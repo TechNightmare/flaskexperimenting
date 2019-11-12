@@ -1,0 +1,17 @@
+<html>
+  <head>
+    <title>Users</title>
+  </head>
+  <body>
+  	<h1> Registrierte User </h1>
+  	<br>
+  	<table border = 1>
+  		{% for user in userInfos %}
+  		<tr>
+  			<td> {{user[0]}} </td>
+  			<td> {{user[1]}} </td>
+  		</tr>
+  		{% endfor %}
+  	</table>
+  </body>
+</html>
