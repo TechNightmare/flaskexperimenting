@@ -53,7 +53,7 @@ def users_name(name):
 
 @app.route('/testpost', methods=['GET', 'POST'])		#if statement isnt POST it is GET so last statement gets used
 def foo():
-	if request.method == 'POST':			#wenn Submit Button gedrueckt wird 
+	if request.method == 'POST':			#wenn Submit Button gedrueckt wird, gilt nicht für json 
 		#fetch form data
 		request_data = request.data
 		#je nach json nun die attributes auslesen
@@ -91,14 +91,16 @@ def echo():
 	elif request.method == 'DELETE':
 		return "ECHO: DELETE\n"
 
-@app.route('/messages', methods=['POST'])
+@app.route('/messages', methods=['POST'])			#json geposted
 def message():
 	if request.headers['Content-Type'] == 'application/json':
+		#content = request.json
+		#name = content['name']		#auslesen
 		return "Sie haben JSON Bullshit geschickt Sie Dreck :( " + json.dumps(request.json)
 
 	return "Nix zu sehen hier\n"
 
-@app.route('/response', methods=['GET'])
+@app.route('/response', methods=['GET'])			#json antwort
 def response():
 	#dictinaries are objects, arrays not
 	data = {
@@ -113,7 +115,7 @@ def response():
 
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	app.run(host='0.0.0.0', debug=True)		#host angabe wichtig für docker
 
 """
 Registrierung:
