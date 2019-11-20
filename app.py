@@ -14,6 +14,11 @@ mysql = MySQL(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+	#todo just do this once, evtl einfach start des python programms?
+	cur = mysql.connection.cursor()
+	cur.execute("CREATE TABLE IF NOT EXISTS users(name varchar(255), email varchar(255))")
+	mysql.connection.commit()
+	cur.close()
 	if request.method == 'POST':			#wenn Submit Button gedrueckt wird 
 		#fetch form data
 		userInfos = request.form
@@ -91,14 +96,37 @@ def echo():
 	elif request.method == 'DELETE':
 		return "ECHO: DELETE\n"
 
+idcount = 0
 @app.route('/messages', methods=['POST'])			#json geposted
 def message():
+	#ID zufügen und neue Spalte machen, Counter hochsetzen
+	global idcount
 	if request.headers['Content-Type'] == 'application/json':
-		#content = request.json
-		#name = content['name']		#auslesen
-		return "Sie haben JSON Bullshit geschickt Sie Dreck :( " + json.dumps(request.json)
+		cur = mysql.connection.cursor()
+		cur.execute("CREATE TABLE IF NOT EXISTS registration(id int, name varchar(255), username varchar(255), email varchar(255), password varchar(255))")
+		mysql.connection.commit()
+		cur.close()
+		
 
+		content 	= request.json
+		print(content)
+		name 		= content['name']		#auslesen
+		username 	= content['username']
+		email 		= content['email']
+		password 	= content['password']
+
+		idcount += 1
+
+		cur = mysql.connection.cursor()
+		cur.execute("INSERT INTO registration(id, name, username, email, password) Values(%s, %s, %s, %s, %s)", (idcount, name, username, email, password))
+		mysql.connection.commit()
+		cur.close()
+
+		#return "Sie haben JSON Bullshit geschickt Sie Dreck :( " + json.dumps(request.json)
+		
+		return "Sie haben JSON Bullshit geschickt Sie Dreck :(ID: {id} Name: {name}  Username: {username}, Email: {email}, Password: {password}".format(id = idcount, name=name, username=username, email=email, password=password)
 	return "Nix zu sehen hier\n"
+
 
 @app.route('/response', methods=['GET'])			#json antwort
 def response():
@@ -119,7 +147,9 @@ if __name__ == '__main__':
 
 """
 Registrierung:
-Vorname, Nachname, Username/Alias in Anwendung, Email, Passwort
+
+Passwörter gehashed speichern!!!
+Name, Username in Anwendung, Email, Passwort
 
 Login
 Username oder Email?, Passwort
@@ -130,6 +160,27 @@ import json
 items = [dict(zip([key[0] for key in cursor.description()], row)) for row in userInfos]
 print(json.dumps({'items': items}))
 
+
 CRUD - create, read, update, delete --> POST, GET, PUT, DELETE
+
+1. Registrierung 
+	Paul schickt ein Post-Request mit JSON Daten für Neuregistrierung
+	Check ob Username schon vergeben
+	Check ob Mail-Adresse bereits verwendet
+	ansonsten in DB einpflegen
+	User-ID zurückgeben und Response Code OK
+
+2. Login
+	Paul schickt Get-Request mit Username/Email und Passwort
+	Check ob User in DB
+	Check ob Passwort übereinstimmt
+	Rückgabe der User-ID und Response Code OK
+
+3. Account löschen
+
+4. Daten ändern
+
+
+
 response code?
 """
